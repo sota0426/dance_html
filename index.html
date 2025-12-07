@@ -166,25 +166,16 @@
         color: #333;
     }
 
-    #audio-container {
-        margin: 30px 0;
-        padding: 30px;
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        border-radius: 20px;
-        border: 3px solid #ff6b9d;
-    }
-
     #audio-play-button {
         background: linear-gradient(135deg, #ff6b9d 0%, #c471ed 100%);
         color: white;
         border: none;
-        padding: 25px 50px; /* ボタンを大きく */
-        font-size: 2.2em; /* アイコンを大きく */
+        padding: 10px 20px; /* ボタンを大きく */
+        font-size: 1.8em; /* アイコンを大きく */
         border-radius: 50px;
         cursor: pointer;
         transition: all 0.3s;
         box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
-        margin: 20px 0;
     }
 
     #audio-play-button:hover {
@@ -279,13 +270,13 @@
 <div id="app">
         <div id="start-screen" class="screen">
             <h1>ようちえん クイズたいかい！</h1>
-            <p>ぜんぶで4もんあるよ！がんばってね！</p>
+            <p>ぜんぶで5もんあるよ！がんばってね！</p>
             <button id="start-button" class="cute-button">✨ クイズをはじめる ✨</button>
         </div>
 
         <div id="quiz-screen" class="screen hidden">
             <div id="header">
-                <span id="question-number">もんだい 1 / 4</span>
+                <span id="question-number">もんだい 1 / 5</span>
                 <span id="score">せいかい: 0こ</span>
             </div>
             
@@ -327,7 +318,7 @@
     // NOTE: 'audioSrc'のファイルパスは、実際にMP3ファイルを配置する必要があります。
     const quizData = [
 {
-            id: 1,
+            id: 4,
             type: 'text',
             question: "お空で雨を降らせるのは？",
             options: ["☁️ くも", "🎈 ふうせん"],
@@ -339,33 +330,44 @@
             question: "ミッキーのおともだちはどっち？",
             // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
             options: [
-                {  text:"１ばん", image: "assets/image/mini-a.png" },
-                {  text:"２ばん",image: "assets/image/mini-b.jpg" }
+                {  text:"１ばん", image: "assets/image/1a.png" },
+                {  text:"２ばん",image: "assets/image/1b.jpg" }
             ],
             answer: "１ばん",
         },
         {
             id: 3,
-            type: 'video', // ★ 新しい動画タイプ
+            type: 'video', // 動画タイプ
             question: "みんなはおどれるかな？",
             videoSrc: "assets/movie/DanceHall.mp4", // ★ MP4ファイルパスを追加 (要設置)
             options: ["できた！"],
             answer: "できた！",
         },
-        // ★ ここから追加された問題 (ID: 4)
+        // ★ ID: 4 新しい鳴き声問題を追加
         {
-            id: 4,
+            id: 1,
+            type: 'audio', 
+            question: "この鳴き声はだれのかな？",
+            audioSrc: "assets/audio/sound.mp3", // ★ 鳴き声MP3ファイルのパス (要設置)
+            options: [
+                {  text:"きりん", image: "assets/image/3a.jpeg" }, // 画像選択式のオーディオ問題
+                {  text:"ぞう", image: "assets/image/3b.jpeg" }
+            ],
+            answer: "ぞう",
+        },
+        // ★ ID: 5 既存のみゃくみゃく問題をID: 5に移動
+        {
+            id: 5,
             type: 'image',
             question: "みゃくみゃくさんは、どちらでしょう？",
             // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
             options: [
-                {  text:"A", image: "assets/image/myaku-A.jpg" },
-                {  text:"B", image: "assets/image/myaku-B.jpg" }
+                {  text:"１ばん", image: "assets/image/2a.jpg" },
+                {  text:"２ばん", image: "assets/image/2b.jpg" }
             ],
-            answer: "B", // 仮の正解
+            answer: "１ばん", // 仮の正解
             specialFeedback: true // ★ 特殊なフィードバックを有効にするフラグ
         }
-        // ★ 追加された問題ここまで
     ];
 
 
@@ -438,7 +440,7 @@ let currentQuestionIndex = 0;
             renderImageOptions(currentQuiz);
         } else if (currentQuiz.type === 'audio') {
             renderAudioOptions(currentQuiz);
-        } else if (currentQuiz.type === 'video') { // ★ 動画タイプを追加
+        } else if (currentQuiz.type === 'video') { // ★ 動画タイプ
             renderVideoOptions(currentQuiz);
         }
     }
@@ -451,7 +453,8 @@ let currentQuestionIndex = 0;
             const button = document.createElement('button');
             button.textContent = option;
             button.className = 'option-button';
-            button.addEventListener('click', () => handleAnswer(option, quiz.answer, quiz.specialFeedback)); // ★ specialFeedbackを追加
+            // ★ specialFeedbackを追加
+            button.addEventListener('click', () => handleAnswer(option, quiz.answer, quiz.specialFeedback)); 
             container.appendChild(button);
         });
         
@@ -482,7 +485,8 @@ let currentQuestionIndex = 0;
             
             div.addEventListener('click', () => {
                 if (!div.classList.contains('disabled')) {
-                    handleAnswer(option.text, quiz.answer, quiz.specialFeedback); // ★ specialFeedbackを追加
+                    // ★ specialFeedbackを追加
+                    handleAnswer(option.text, quiz.answer, quiz.specialFeedback);
                 }
             });
             container.appendChild(div);
@@ -492,16 +496,24 @@ let currentQuestionIndex = 0;
     }
 
     function renderAudioOptions(quiz) {
+        const audioWrapper = document.createElement('div');
+        audioWrapper.id = 'audio-wrapper';
+        audioWrapper.style.textAlign = 'center';
+        
         const audioContainer = document.createElement('div');
         audioContainer.id = 'audio-container';
+        // HTMLのoptionsがオブジェクトか文字列かで表示を切り替える
+        const isImageOptions = quiz.options && typeof quiz.options[0] === 'object'; 
+
         audioContainer.innerHTML = `
-            <p style="font-size: 1.5em; margin-bottom: 10px;">${quiz.audioDescription}</p>
+            <p style="font-size: 1.5em;">${quiz.audioDescription || ''}</p>
             <button id="audio-play-button">▶️ おとを きく</button>
             <div id="audio-hint" style="display: none;"></div>
         `;
         
         const playButton = audioContainer.querySelector('#audio-play-button');
         
+        // currentAudioの初期化
         currentAudio = new Audio(quiz.audioSrc);
 
         playButton.addEventListener('click', () => {
@@ -510,30 +522,68 @@ let currentQuestionIndex = 0;
                 playButton.textContent = '🔊 もういちど きく';
                 audioPlayed = true;
             }).catch(error => {
-                alert('オーディオの再生に失敗しました。ファイルパスを確認してください。');
+                alert('オーディオの再生に失敗しました。ファイルパス（assets/audio/dog_bark.mp3）を確認してください。');
                 console.error("Audio playback error:", error);
             });
         });
         
-        quizContent.appendChild(audioContainer);
+        audioWrapper.appendChild(audioContainer);
+        quizContent.appendChild(audioWrapper);
 
-        const optionsContainer = document.createElement('div');
-        optionsContainer.id = 'options-container';
-        
-        quiz.options.forEach(option => {
-            const button = document.createElement('button');
-            button.textContent = option;
-            button.className = 'option-button';
-            button.addEventListener('click', () => {
-                handleAnswer(option, quiz.answer, quiz.specialFeedback); // ★ specialFeedbackを追加
+
+        // 画像選択肢の描画（オーディオ問題用）
+        if (isImageOptions) {
+            const container = document.createElement('div');
+            container.className = 'image-options-container';
+            
+            quiz.options.forEach(option => {
+                const div = document.createElement('div');
+                div.className = 'image-option';
+                
+                const img = document.createElement('img');
+                img.src = option.image.startsWith('assets/') ? 
+                          option.image : 
+                          'https://via.placeholder.com/200/AAAAAA/FFFFFF?text=NO+IMAGE'; 
+                img.alt = option.text;
+                img.className = 'image-option-emoji';
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'image-option-text';
+                textDiv.textContent = option.text;
+                
+                div.appendChild(img);
+                div.appendChild(textDiv);
+                
+                div.addEventListener('click', () => {
+                    if (!div.classList.contains('disabled')) {
+                        // ★ specialFeedbackを追加 (オーディオ問題では通常false)
+                        handleAnswer(option.text, quiz.answer, quiz.specialFeedback);
+                    }
+                });
+                container.appendChild(div);
             });
-            optionsContainer.appendChild(button);
-        });
-        
-        quizContent.appendChild(optionsContainer);
+            
+            quizContent.appendChild(container);
+        } else {
+             // テキスト選択肢の描画（従来のオーディオ問題用）
+            const optionsContainer = document.createElement('div');
+            optionsContainer.id = 'options-container';
+            
+            quiz.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option-button';
+                button.addEventListener('click', () => {
+                    handleAnswer(option, quiz.answer, quiz.specialFeedback);
+                });
+                optionsContainer.appendChild(button);
+            });
+            
+            quizContent.appendChild(optionsContainer);
+        }
     }
 
-    // ★ 動画問題をレンダリングする新しい関数
+    // ★ 動画問題をレンダリングする関数
     function renderVideoOptions(quiz) {
         videoContainer.classList.remove('hidden'); // 動画コンテナを表示
         currentVideo = quizVideo; // グローバル変数に現在の動画要素を設定
@@ -554,7 +604,8 @@ let currentQuestionIndex = 0;
             button.className = 'option-button';
             button.addEventListener('click', () => {
                 // 動画を再生していなくても解答はできるように変更
-                handleAnswer(option, quiz.answer, quiz.specialFeedback); // ★ specialFeedbackを追加
+                // ★ specialFeedbackを追加
+                handleAnswer(option, quiz.answer, quiz.specialFeedback);
             });
             optionsContainer.appendChild(button);
         });
@@ -598,12 +649,7 @@ let currentQuestionIndex = 0;
         if (specialFeedback) {
             popupMessage.textContent = "なんと！みゃくみゃくが登場します！✨";
             correctAnswerText.textContent = ""; // 正解・不正解を表示しない
-            // 正解・不正解に関わらず、スコアは加算しない (演出優先)
-            if (isCorrect) {
-                // 実際には正解でもスコアは加算しない（仕様の確認）
-                // 今回は「正解が登場します！」が目的なので、スコアは変えないでおく
-                // score++; // もし正解なら加算したい場合はこの行を有効にする
-            }
+            // この問題はスコアに加算しないという特殊なルールのため、score++は行わない
         } else {
             // 通常のフィードバック
             if (isCorrect) {
@@ -639,7 +685,7 @@ function showResultScreen() {
         quizScreen.classList.add('hidden');
         resultScreen.classList.remove('hidden');
         // ★ 問題数 quizData.length に合わせる
-        finalScoreText.innerHTML = `ぜんぶで <strong>${quizData.length}もん</strong> のうち、<br><strong>${score}こ</strong> せいかいしたよ！<br><br>すごいね！✨`;
+        finalScoreText.innerHTML = `ぜんぶで <strong>${quizData.length}もん</strong> のうち、<br><strong>${quizData.length}こ</strong> せいかいしたよ！<br><br>すごいね！✨`;
     }
 
     startButton.addEventListener('click', startQuiz);
