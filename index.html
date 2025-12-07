@@ -279,13 +279,13 @@
 <div id="app">
         <div id="start-screen" class="screen">
             <h1>ようちえん クイズたいかい！</h1>
-            <p>ぜんぶで10もんあるよ！がんばってね！</p>
+            <p>ぜんぶで4もんあるよ！がんばってね！</p>
             <button id="start-button" class="cute-button">✨ クイズをはじめる ✨</button>
         </div>
 
         <div id="quiz-screen" class="screen hidden">
             <div id="header">
-                <span id="question-number">もんだい 1 / 10</span>
+                <span id="question-number">もんだい 1 / 4</span>
                 <span id="score">せいかい: 0こ</span>
             </div>
             
@@ -351,7 +351,21 @@
             videoSrc: "assets/movie/DanceHall.mp4", // ★ MP4ファイルパスを追加 (要設置)
             options: ["できた！"],
             answer: "できた！",
+        },
+        // ★ ここから追加された問題 (ID: 4)
+        {
+            id: 4,
+            type: 'image',
+            question: "みゃくみゃくさんは、どちらでしょう？",
+            // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
+            options: [
+                {  text:"A", image: "assets/image/myaku-A.jpg" },
+                {  text:"B", image: "assets/image/myaku-B.jpg" }
+            ],
+            answer: "B", // 仮の正解
+            specialFeedback: true // ★ 特殊なフィードバックを有効にするフラグ
         }
+        // ★ 追加された問題ここまで
     ];
 
 
@@ -409,6 +423,7 @@ let currentQuestionIndex = 0;
         audioPlayed = false;
         videoPlayed = false; // ★ 動画再生フラグをリセット
 
+        // ★ 問題数の表示を修正
         questionNumberSpan.textContent = `もんだい ${currentQuestionIndex + 1} / ${quizData.length}`;
         scoreSpan.textContent = `せいかい: ${score}こ`;
         questionText.textContent = currentQuiz.question;
@@ -436,7 +451,7 @@ let currentQuestionIndex = 0;
             const button = document.createElement('button');
             button.textContent = option;
             button.className = 'option-button';
-            button.addEventListener('click', () => handleAnswer(option, quiz.answer));
+            button.addEventListener('click', () => handleAnswer(option, quiz.answer, quiz.specialFeedback)); // ★ specialFeedbackを追加
             container.appendChild(button);
         });
         
@@ -467,7 +482,7 @@ let currentQuestionIndex = 0;
             
             div.addEventListener('click', () => {
                 if (!div.classList.contains('disabled')) {
-                    handleAnswer(option.text, quiz.answer);
+                    handleAnswer(option.text, quiz.answer, quiz.specialFeedback); // ★ specialFeedbackを追加
                 }
             });
             container.appendChild(div);
@@ -510,7 +525,7 @@ let currentQuestionIndex = 0;
             button.textContent = option;
             button.className = 'option-button';
             button.addEventListener('click', () => {
-                handleAnswer(option, quiz.answer);
+                handleAnswer(option, quiz.answer, quiz.specialFeedback); // ★ specialFeedbackを追加
             });
             optionsContainer.appendChild(button);
         });
@@ -539,7 +554,7 @@ let currentQuestionIndex = 0;
             button.className = 'option-button';
             button.addEventListener('click', () => {
                 // 動画を再生していなくても解答はできるように変更
-                handleAnswer(option, quiz.answer);
+                handleAnswer(option, quiz.answer, quiz.specialFeedback); // ★ specialFeedbackを追加
             });
             optionsContainer.appendChild(button);
         });
@@ -547,10 +562,11 @@ let currentQuestionIndex = 0;
         quizContent.appendChild(optionsContainer);
     }
 
-    function handleAnswer(selectedOption, correctAnswer) {
+    // ★ specialFeedback パラメータを追加
+    function handleAnswer(selectedOption, correctAnswer, specialFeedback = false) {
         const isCorrect = selectedOption.includes(correctAnswer) || 
                          selectedOption === correctAnswer;
-
+        
         // 音声問題を解答したときに、再生中の音声があれば停止する
         if (currentAudio) {
             currentAudio.pause();
@@ -578,14 +594,26 @@ let currentQuestionIndex = 0;
             playButton.disabled = true;
         }
 
-
-        if (isCorrect) {
-            score++;
-            popupMessage.textContent = "やったね！せいかい！🌟";
-            correctAnswerText.textContent = "";
+        // ★ 特殊フィードバックの処理
+        if (specialFeedback) {
+            popupMessage.textContent = "なんと！みゃくみゃくが登場します！✨";
+            correctAnswerText.textContent = ""; // 正解・不正解を表示しない
+            // 正解・不正解に関わらず、スコアは加算しない (演出優先)
+            if (isCorrect) {
+                // 実際には正解でもスコアは加算しない（仕様の確認）
+                // 今回は「正解が登場します！」が目的なので、スコアは変えないでおく
+                // score++; // もし正解なら加算したい場合はこの行を有効にする
+            }
         } else {
-            popupMessage.textContent = "ざんねん…ちがうよ！😔";
-            correctAnswerText.textContent = `せいかいは「${correctAnswer}」だよ。`;
+            // 通常のフィードバック
+            if (isCorrect) {
+                score++;
+                popupMessage.textContent = "やったね！せいかい！🌟";
+                correctAnswerText.textContent = "";
+            } else {
+                popupMessage.textContent = "ざんねん…ちがうよ！😔";
+                correctAnswerText.textContent = `せいかいは「${correctAnswer}」だよ。`;
+            }
         }
 
         scoreSpan.textContent = `せいかい: ${score}こ`;
@@ -610,6 +638,7 @@ let currentQuestionIndex = 0;
 function showResultScreen() {
         quizScreen.classList.add('hidden');
         resultScreen.classList.remove('hidden');
+        // ★ 問題数 quizData.length に合わせる
         finalScoreText.innerHTML = `ぜんぶで <strong>${quizData.length}もん</strong> のうち、<br><strong>${score}こ</strong> せいかいしたよ！<br><br>すごいね！✨`;
     }
 
