@@ -84,12 +84,7 @@
     }
 
     #header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        font-size: 1.5em; /* ヘッダーを大きく */
-        color: #666;
-        font-weight: bold;
+        display: none;
     }
 
     #options-container {
@@ -317,57 +312,98 @@
     // 問題データ（3種類の画面タイプ）
     // NOTE: 'audioSrc'のファイルパスは、実際にMP3ファイルを配置する必要があります。
     const quizData = [
-{
-            id: 4,
-            type: 'text',
-            question: "お空で雨を降らせるのは？",
-            options: ["☁️ くも", "🎈 ふうせん"],
-            answer: "☁️ くも",
+        {
+            id: null,
+            type: 'image',
+            question: "すすんでいいのはどっち？",
+            options: [
+                {  text:"あかいろ", image: "assets/image/singou/aka.png" },
+                {  text:"あおいろ",image: "assets/image/singou/ao.png" }
+            ],
+            answer: "あおいろ",
         },
         {
-            id: 2,
+            id: null,
             type: 'image',
-            question: "ミッキーのおともだちはどっち？",
-            // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
+            question: "おそらであめをふらせるのはどっち？",
             options: [
-                {  text:"１ばん", image: "assets/image/1a.png" },
-                {  text:"２ばん",image: "assets/image/1b.jpg" }
+                {  text:"１ばん", image: "assets/image/kumo/1.png" },
+                {  text:"２ばん",image: "assets/image/kumo/2.png" }
             ],
             answer: "１ばん",
         },
         {
-            id: 3,
+            id: "test",
+            type: 'image',
+            question: "ねこちゃんのあいぼうはどっち？",
+            options: [
+                {  text:"えびのしっぽ", image: "assets/image/sumikko/ebi.png" },
+                {  text:"ざっそう",image: "assets/image/sumikko/kusa.png" }
+            ],
+            answer: "ざっそう",
+        },
+        {
+            id: null,
+            type: 'audio', 
+            question: "この動物のなきごえはどっち？",
+            audioSrc: "assets/audio/animal.mp3", // ★ 鳴き声MP3ファイルのパス (要設置)
+            options: [
+                {  text:"らいおん", image: "assets/image/animal/lion.jpeg" }, // 画像選択式のオーディオ問題
+                {  text:"ぞう", image: "assets/image/animal/zou.jpeg" }
+            ],
+            answer: "ぞう",
+        },
+        {
+            id: null,
+            type: 'image',
+            question: "アンパンマンのなかみはどっち？",
+            options: [
+                {  text:"こしあん", image: "assets/image/anpan/kosi.jpg" },
+                {  text:"つぶあん",image: "assets/image/anpan/tubu.jpg" }
+            ],
+            answer: "こしあん",
+        },
+        {
+            id: null,
+            type: 'image',
+            question: "ピカチュウはどっち？",
+            options: [
+                {  text:"１ばん", image: "assets/image/pokemon/mimi.png" },
+                {  text:"２ばん",image: "assets/image/pokemon/pika.png" }
+            ],
+            answer: "２ばん",
+        },
+        {
+            id: null,
+            type: 'image',
+            question: "ミッキーのおともだちはどっち？",
+            // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
+            options: [
+                {  text:"１ばん", image: "assets/image/minny/sensei.jpg" },
+                {  text:"２ばん",image: "assets/image/minny/minny.png" }
+            ],
+            answer: "２ばん",
+        },
+        {
+            id: "null",
+            type: 'image',
+            question: "みゃくみゃくさんは、どちらでしょう？",
+            // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
+            options: [
+                {  text:"１ばん", image: "assets/image/myaku/myaku.jpg" },
+                {  text:"２ばん", image: "assets/image/myaku/anpan.jpg" }
+            ],
+            answer: "１ばん", // 仮の正解
+            specialFeedback: true // ★ 特殊なフィードバックを有効にするフラグ
+        },
+        {
+            id: null,
             type: 'video', // 動画タイプ
             question: "みんなはおどれるかな？",
             videoSrc: "assets/movie/DanceHall.mp4", // ★ MP4ファイルパスを追加 (要設置)
             options: ["できた！"],
             answer: "できた！",
         },
-        // ★ ID: 4 新しい鳴き声問題を追加
-        {
-            id: 1,
-            type: 'audio', 
-            question: "この鳴き声はだれのかな？",
-            audioSrc: "assets/audio/sound.mp3", // ★ 鳴き声MP3ファイルのパス (要設置)
-            options: [
-                {  text:"きりん", image: "assets/image/3a.jpeg" }, // 画像選択式のオーディオ問題
-                {  text:"ぞう", image: "assets/image/3b.jpeg" }
-            ],
-            answer: "ぞう",
-        },
-        // ★ ID: 5 既存のみゃくみゃく問題をID: 5に移動
-        {
-            id: 5,
-            type: 'image',
-            question: "みゃくみゃくさんは、どちらでしょう？",
-            // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
-            options: [
-                {  text:"１ばん", image: "assets/image/2a.jpg" },
-                {  text:"２ばん", image: "assets/image/2b.jpg" }
-            ],
-            answer: "１ばん", // 仮の正解
-            specialFeedback: true // ★ 特殊なフィードバックを有効にするフラグ
-        }
     ];
 
 
@@ -647,7 +683,7 @@ let currentQuestionIndex = 0;
 
         // ★ 特殊フィードバックの処理
         if (specialFeedback) {
-            popupMessage.textContent = "なんと！みゃくみゃくが登場します！✨";
+            popupMessage.textContent = "せいかいは・・・✨";
             correctAnswerText.textContent = ""; // 正解・不正解を表示しない
             // この問題はスコアに加算しないという特殊なルールのため、score++は行わない
         } else {
@@ -657,7 +693,7 @@ let currentQuestionIndex = 0;
                 popupMessage.textContent = "やったね！せいかい！🌟";
                 correctAnswerText.textContent = "";
             } else {
-                popupMessage.textContent = "ざんねん…ちがうよ！😔";
+                popupMessage.textContent = "…ちがうよ！😔";
                 correctAnswerText.textContent = `せいかいは「${correctAnswer}」だよ。`;
             }
         }
@@ -672,14 +708,20 @@ let currentQuestionIndex = 0;
         renderQuestion();
     }
 
-    function startQuiz() {
-        startScreen.classList.add('hidden');
-        resultScreen.classList.add('hidden');
-        quizScreen.classList.remove('hidden');
-        currentQuestionIndex = 0;
-        score = 0;
-        renderQuestion();
-    }
+function startQuiz() {
+    quizData.sort((a, b) => {
+        if (a.id === "test" && b.id !== "test") return -1;
+        if (a.id !== "test" && b.id === "test") return 1;
+        return 0; // それ以外は順番維持
+    });
+
+    startScreen.classList.add('hidden');
+    resultScreen.classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+    currentQuestionIndex = 0;
+    score = 0;
+    renderQuestion();
+}
 
 function showResultScreen() {
         quizScreen.classList.add('hidden');
