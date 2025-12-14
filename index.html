@@ -488,7 +488,7 @@ let currentQuestionIndex = 0;
         videoPlayed = false; // ★ 動画再生フラグをリセット
 
         // ★ 問題数の表示を修正
-        questionNumberSpan.textContent = `もんだい ${currentQuestionIndex + 1} / ${quizData.length}`;
+        questionNumberSpan.textContent = `もんだい ${currentQuestionIndex + 1} / 10`;
         questionText.textContent = currentQuiz.question;
 
         quizContent.innerHTML = ''; // quiz-contentをクリアする前にvideo-containerを再配置
