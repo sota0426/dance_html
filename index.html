@@ -83,14 +83,13 @@
         transform: translateY(-1px);
     }
 
-#header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    font-size: 1.6em;
-    font-weight: bold;
-}
+    #header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.6em;
+        font-weight: bold;
+    }
 
     #options-container {
         display: flex;
@@ -238,6 +237,39 @@
         margin: 30px 0;
     }
 
+    /* 音楽再生ボタンのスタイル */
+    #music-play-button {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border: none;
+        padding: 18px 45px;
+        font-size: 1.5em;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+        font-weight: bold;
+        margin: 10px;
+    }
+
+    #music-play-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(79, 172, 254, 0.5);
+    }
+
+    #music-play-button:active {
+        transform: translateY(-1px);
+    }
+
+    /* ボタンコンテナのスタイル */
+    #music-button-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
     /*
      * 既存の .image-options-container や .image-option のサイズ変更に倣い、
      * 動画コンテナの高さと動画要素自体の高さを大幅に増やします。
@@ -289,7 +321,7 @@
             </div>
         </div>
 
-<div id="result-screen" class="screen hidden">
+        <div id="result-screen" class="screen hidden">
             <h1>🌸 おしまい！ 🌸</h1>
             <p id="final-score-text"></p>
             <p class="cute-button" style="cursor: default;">あそんでくれて ありがとう！</p>
@@ -300,6 +332,9 @@
         <div id="popup-content">
             <h2 id="popup-message"></h2>
             <p id="correct-answer-text"></p>
+            <div id="music-button-container" class="hidden">
+                <button id="music-play-button">♪ おんがくさいせい ♪</button>
+            </div>
             <button id="next-button" class="cute-button">つぎへ</button>
         </div>
     </div>
@@ -432,14 +467,14 @@
         },        
     ];
 
-
-
-let currentQuestionIndex = 0;
+    let currentQuestionIndex = 0;
     let score = 0;
     let audioPlayed = false;
     let videoPlayed = false; // ★ 動画再生フラグを追加
     let currentAudio = null; 
     let currentVideo = null; // ★ 動画要素を保持
+    let specialMusic = null; // ★ 特殊フィードバック用の音楽
+    let isMusicPlaying = false; // ★ 音楽再生状態
 
     const startScreen = document.getElementById('start-screen');
     const quizScreen = document.getElementById('quiz-screen');
@@ -455,12 +490,49 @@ let currentQuestionIndex = 0;
     const popupMessage = document.getElementById('popup-message');
     const correctAnswerText = document.getElementById('correct-answer-text');
     const nextButton = document.getElementById('next-button');
+    const musicButtonContainer = document.getElementById('music-button-container');
+    const musicPlayButton = document.getElementById('music-play-button');
 
     // 動画関連要素
     const videoContainer = document.getElementById('video-container');
     const quizVideo = document.getElementById('quiz-video');
     const videoDescription = document.getElementById('video-description');
 
+    // ★ 音楽再生ボタンのイベントリスナー
+    musicPlayButton.addEventListener('click', () => {
+        if (!specialMusic) {
+            // 初回クリック時に音楽を読み込む
+            specialMusic = new Audio('assets/audio/myaku.mp3');
+            
+            // 音楽が終了したときの処理
+            specialMusic.addEventListener('ended', () => {
+                isMusicPlaying = false;
+                musicPlayButton.textContent = '♪ おんがくさいせい ♪';
+            });
+            
+            // 再生エラーのハンドリング
+            specialMusic.addEventListener('error', (e) => {
+                console.error('音楽ファイルの読み込みエラー:', e);
+                alert('音楽ファイルが見つかりません。パスを確認してください: assets/audio/myaku.mp3');
+            });
+        }
+
+        if (isMusicPlaying) {
+            // 再生中の場合は一時停止
+            specialMusic.pause();
+            isMusicPlaying = false;
+            musicPlayButton.textContent = '▶️ さいせい';
+        } else {
+            // 停止中の場合は再生
+            specialMusic.play().then(() => {
+                isMusicPlaying = true;
+                musicPlayButton.textContent = '⏸ いちじていし';
+            }).catch(error => {
+                console.error('音楽の再生エラー:', error);
+                alert('音楽の再生に失敗しました。');
+            });
+        }
+    });
 
     function renderQuestion() {
         if (currentQuestionIndex >= quizData.length) {
@@ -481,7 +553,6 @@ let currentQuestionIndex = 0;
             currentVideo.src = ""; // ソースをクリアしてメモリを解放
             currentVideo = null;
         }
-
 
         const currentQuiz = quizData[currentQuestionIndex];
         audioPlayed = false;
@@ -594,7 +665,6 @@ let currentQuestionIndex = 0;
         audioWrapper.appendChild(audioContainer);
         quizContent.appendChild(audioWrapper);
 
-
         // 画像選択肢の描画（オーディオ問題用）
         if (isImageOptions) {
             const container = document.createElement('div');
@@ -678,10 +748,6 @@ let currentQuestionIndex = 0;
         quizContent.appendChild(optionsContainer);
     }
 
-
-
-
-    
     // ★ specialFeedback パラメータを追加
     function handleAnswer(selectedOption, correctAnswer, specialFeedback = false) {
         const isCorrect = selectedOption.includes(correctAnswer) || 
@@ -718,8 +784,12 @@ let currentQuestionIndex = 0;
         if (specialFeedback) {
             popupMessage.textContent = "せいかいは・・・✨";
             correctAnswerText.textContent = ""; // 正解・不正解を表示しない
+            musicButtonContainer.classList.remove('hidden'); // 音楽ボタンを表示
+            musicPlayButton.textContent = '♪ おんがくさいせい ♪'; // ボタンテキストをリセット
+            isMusicPlaying = false; // 再生状態をリセット
             // この問題はスコアに加算しないという特殊なルールのため、score++は行わない
         } else {
+            musicButtonContainer.classList.add('hidden'); // 通常問題では音楽ボタンを非表示
             // 通常のフィードバック
             if (isCorrect) {
                 score++;
@@ -735,31 +805,40 @@ let currentQuestionIndex = 0;
     }
 
     function moveToNext() {
+        // 音楽を停止
+        if (specialMusic) {
+            specialMusic.pause();
+            specialMusic.currentTime = 0;
+            isMusicPlaying = false;
+        }
+        
         feedbackPopup.classList.add('hidden');
+        musicButtonContainer.classList.add('hidden');
         currentQuestionIndex++;
         renderQuestion();
     }
 
-function startQuiz() {
-    quizData.sort((a, b) => {
-        if (a.id === "test" && b.id !== "test") return -1;
-        if (a.id !== "test" && b.id === "test") return 1;
-        return 0; // それ以外は順番維持
-    });
+    function startQuiz() {
+        quizData.sort((a, b) => {
+            if (a.id === "test" && b.id !== "test") return -1;
+            if (a.id !== "test" && b.id === "test") return 1;
+            return 0; // それ以外は順番維持
+        });
 
-    startScreen.classList.add('hidden');
-    resultScreen.classList.add('hidden');
-    quizScreen.classList.remove('hidden');
-    currentQuestionIndex = 0;
-    score = 0;
-    renderQuestion();
-}
+        startScreen.classList.add('hidden');
+        resultScreen.classList.add('hidden');
+        quizScreen.classList.remove('hidden');
+        currentQuestionIndex = 0;
+        score = 0;
+        renderQuestion();
+    }
 
-function showResultScreen() {
+    function showResultScreen() {
         quizScreen.classList.add('hidden');
         resultScreen.classList.remove('hidden');
+
         // ★ 問題数 quizData.length に合わせる
-        finalScoreText.innerHTML = `ぜんぶで <strong>${quizData.length}もん</strong> のうち、<br><strong>${quizData.length}こ</strong> せいかいしたよ！<br><br>すごいね！✨`;
+        finalScoreText.innerHTML = `たくさんせいかいしたね！おめでとう！✨`;
     }
 
     startButton.addEventListener('click', startQuiz);
@@ -778,7 +857,6 @@ function showResultScreen() {
         videoContainer.classList.add('hidden'); // 最初は非表示
     });
 </script>
-
 
 </body>
 </html>
