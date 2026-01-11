@@ -467,6 +467,7 @@
     let currentVideo = null; // ★ 動画要素を保持
     let specialMusic = null; // ★ 特殊フィードバック用の音楽
     let isMusicPlaying = false; // ★ 音楽再生状態
+    let correctSound = null; // ★ 正解時の効果音
 
     const startScreen = document.getElementById('start-screen');
     const quizScreen = document.getElementById('quiz-screen');
@@ -787,6 +788,15 @@
                 score++;
                 popupMessage.textContent = "やったね！せいかい！🌟";
                 correctAnswerText.textContent = "";
+                
+                // ★ 正解時の効果音を再生
+                if (!correctSound) {
+                    correctSound = new Audio('assets/audio/ding.mp3');
+                }
+                correctSound.currentTime = 0; // 最初から再生
+                correctSound.play().catch(error => {
+                    console.error('効果音の再生エラー:', error);
+                });
             } else {
                 popupMessage.textContent = "…ちがうよ！😔";
                 correctAnswerText.textContent = `せいかいは「${correctAnswer}」だよ。`;
