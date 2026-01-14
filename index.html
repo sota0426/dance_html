@@ -429,7 +429,7 @@
         {
             id: null,
             type: 'image',
-            question: "園長先生はどっちかな？",
+            question: "えんちょうせんせいはどっちかな？",
             // NOTE: 仮の画像パスを使用しています。実際のファイルが必要です。
             options: [
                 {  text:"１ばん", image: "assets/image/entyou/asi.png" },
@@ -456,7 +456,15 @@
             videoSrc: "assets/movie/short.mp4",
             options: ["できた！"],
             answer: "できた！",
-        }    
+        } ,
+        {
+            id: null,
+            type: 'video', // 動画タイプ
+            question: "もういちどみんなでおどろう！",
+            videoSrc: "assets/movie/long.mp4",
+            options: ["できた！"],
+            answer: "できた！",
+        }       
     ];
 
     let currentQuestionIndex = 0;
