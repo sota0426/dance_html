@@ -751,69 +751,80 @@
 
     // ★ specialFeedback パラメータを追加
     function handleAnswer(selectedOption, correctAnswer, specialFeedback = false) {
-        const isCorrect = selectedOption.includes(correctAnswer) || 
-                         selectedOption === correctAnswer;
-        
-        // 音声問題を解答したときに、再生中の音声があれば停止する
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-        }
-        // 動画問題を解答したときに、再生中の動画があれば停止する
-        if (currentVideo) {
-            currentVideo.pause();
-            currentVideo.classList.add('hidden');
-            videoContainer.classList.add('hidden');
-            currentVideo.src = ""; // ソースをクリア
-            currentVideo = null;
-        }
-
-        document.querySelectorAll('.option-button').forEach(button => {
-            button.disabled = true;
-        });
-        
-        document.querySelectorAll('.image-option').forEach(div => {
-            div.classList.add('disabled');
-        });
-        
-        const playButton = document.getElementById('audio-play-button');
-        if (playButton) {
-            playButton.disabled = true;
-        }
-
-        // ★ 特殊フィードバックの処理
-        if (specialFeedback) {
-            popupMessage.textContent = "せいかいは・・・✨";
-            correctAnswerText.textContent = ""; // 正解・不正解を表示しない
-            musicButtonContainer.classList.remove('hidden'); // 音楽ボタンを表示
-            musicPlayButton.textContent = '♪ おんがくさいせい ♪'; // ボタンテキストをリセット
-            isMusicPlaying = false; // 再生状態をリセット
-            // この問題はスコアに加算しないという特殊なルールのため、score++は行わない
-        } else {
-            musicButtonContainer.classList.add('hidden'); // 通常問題では音楽ボタンを非表示
-            // 通常のフィードバック
-            if (isCorrect) {
-                score++;
-                popupMessage.textContent = "やったね！せいかい！🌟";
-                correctAnswerText.textContent = "";
-                
-                // ★ 正解時の効果音を再生
-                if (!correctSound) {
-                    correctSound = new Audio('assets/audio/ding.mp3');
-                }
-                correctSound.currentTime = 0; // 最初から再生
-                correctSound.play().catch(error => {
-                    console.error('効果音の再生エラー:', error);
-                });
-            } else {
-                popupMessage.textContent = "…ちがうよ！😔";
-                correctAnswerText.textContent = `せいかいは「${correctAnswer}」だよ。`;
-            }
-        }
-
-        feedbackPopup.classList.remove('hidden');
+    const isCorrect = selectedOption.includes(correctAnswer) || 
+                     selectedOption === correctAnswer;
+    
+    // 音声問題を解答したときに、再生中の音声があれば停止する
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    // 動画問題を解答したときに、再生中の動画があれば停止する
+    if (currentVideo) {
+        currentVideo.pause();
+        currentVideo.classList.add('hidden');
+        videoContainer.classList.add('hidden');
+        currentVideo.src = ""; // ソースをクリア
+        currentVideo = null;
     }
 
+    document.querySelectorAll('.option-button').forEach(button => {
+        button.disabled = true;
+    });
+    
+    document.querySelectorAll('.image-option').forEach(div => {
+        div.classList.add('disabled');
+    });
+    
+    const playButton = document.getElementById('audio-play-button');
+    if (playButton) {
+        playButton.disabled = true;
+    }
+
+    // ★ 特殊フィードバックの処理
+    if (specialFeedback) {
+        popupMessage.textContent = "せいかいは・・・✨";
+        correctAnswerText.textContent = ""; // 正解・不正解を表示しない
+        musicButtonContainer.classList.remove('hidden'); // 音楽ボタンを表示
+        musicPlayButton.textContent = '♪ おんがくさいせい ♪'; // ボタンテキストをリセット
+        isMusicPlaying = false; // 再生状態をリセット
+    } else {
+        musicButtonContainer.classList.add('hidden'); // 通常問題では音楽ボタンを非表示
+        // 通常のフィードバック
+        if (isCorrect) {
+            score++;
+            popupMessage.textContent = "やったね！せいかい！🌟";
+            correctAnswerText.textContent = "";
+            
+            // ★★★ 修正箇所：毎回新しいAudioオブジェクトを作成 ★★★
+            // これによりBluetooth接続時の再生問題を解決
+            const newCorrectSound = new Audio('assets/audio/ding.mp3');
+            
+            // 再生が完了したらオブジェクトを破棄（メモリリーク防止）
+            newCorrectSound.addEventListener('ended', () => {
+                newCorrectSound.src = '';
+            });
+            
+            // エラーハンドリング
+            newCorrectSound.addEventListener('error', (error) => {
+                console.error('効果音の再生エラー:', error);
+            });
+            
+            // 少し遅延させてから再生（Bluetooth接続の安定性向上）
+            setTimeout(() => {
+                newCorrectSound.play().catch(error => {
+                    console.error('効果音の再生エラー:', error);
+                });
+            }, 100); // 100msの遅延
+            
+        } else {
+            popupMessage.textContent = "…ちがうよ！😔";
+            correctAnswerText.textContent = `せいかいは「${correctAnswer}」だよ。`;
+        }
+    }
+
+    feedbackPopup.classList.remove('hidden');
+}
     function moveToNext() {
         // 音楽を停止
         if (specialMusic) {
